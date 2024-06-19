@@ -1,19 +1,18 @@
-local uv = vim.loop
 local Path = require('plenary.path')
-local config = require('notebook_manager.config')
+local PyProject = require('notebook_manager.toml_parcer.pyproject')
 local M = {}
 
-local function ensure_directory_exists(dir)
+M.ensure_directory_exists = function(dir)
   local path = Path:new(dir)
   if not path:exists() then
     path:mkdir({ parents = true })
   end
 end
 
-M.create_book = function(file_name)
-  local file_path = config.options.dir .. "/" .. file_name .. ".ipynb"
-  ensure_directory_exists(config.options.dir)
-  print("Creating book: " .. file_name)
+M.get_project_info = function()
+  local pyproject = PyProject:new()
+  print(pyproject.project_name)
 end
+
 
 return M
