@@ -10,9 +10,15 @@ M.ensure_directory_exists = function(dir)
 end
 
 M.get_project_info = function()
-  local pyproject = PyProject:new()
-  print(pyproject.project_name)
+  return PyProject:new()
 end
 
+M.create_file = function(file, content)
+  local path = Path:new(file)
+  if not path:exists() then
+    path:touch()
+  end
+  path:write(vim.fn.json_encode(content), 'w')
+end
 
 return M

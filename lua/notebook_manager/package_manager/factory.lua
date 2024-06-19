@@ -9,7 +9,7 @@ function PackageManagerFactory:createManager(config)
   elseif config.tool.rye ~= nil then
     return ""
   else
-    error("Invalid/Unsupported toml configuration")
+    return nil
   end
 end
 

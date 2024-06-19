@@ -26,7 +26,7 @@ function PackageManagerPoetry:get_project_author()
 end
 
 function PackageManagerPoetry:get_project_version()
-  return self.config.tool.poetry.version or "Unknown version"
+  return self.config.tool.poetry.dependencies.python or "Unknown version"
 end
 
 return PackageManagerPoetry
