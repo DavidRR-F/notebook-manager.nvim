@@ -18,7 +18,7 @@ M.create_file = function(file, content)
   if not path:exists() then
     path:touch()
   end
-  path:write(vim.fn.json_encode(content), 'w')
+  path:write(content, 'w')
 end
 
 return M

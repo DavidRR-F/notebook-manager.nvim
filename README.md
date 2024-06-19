@@ -1,3 +1,6 @@
 # Notebook Manager
 
-init
+
+
+### Dependecies
+- ipykernel

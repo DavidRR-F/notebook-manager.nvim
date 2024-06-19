@@ -6,6 +6,7 @@ setmetatable(PackageManagerPoetry, { __index = PackageManagerBase })
 
 function PackageManagerPoetry:new(config)
   local instance = setmetatable({}, PackageManagerPoetry)
+  instance.cli = "poetry"
   instance.config = config
   return instance
 end
