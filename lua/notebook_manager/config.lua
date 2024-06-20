@@ -2,7 +2,7 @@ local M = {}
 
 M.options = {
   notebook_dir = "./notebooks",
-  kernel_dir = "default",
+  kernel_dir = "~/.local/share/jupyter/kernels",
 }
 
 M.setup = function(opts)

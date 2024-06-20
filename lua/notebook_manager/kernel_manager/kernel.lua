@@ -1,4 +1,5 @@
 local config = require('notebook_manager.config')
+local utils = require('notebook_manager.utils')
 
 local KernelManager = {}
 KernelManager.__index = KernelManager
@@ -11,34 +12,23 @@ end
 
 function KernelManager:create_kernel(name, manager)
   local cmd
-  local tool
+  local tool = "python -m ipykernel install --user --name="
 
-  if self.path == "default" then
-    tool = "jupyter kernelspec install --user --name="
-  else
-    tool = "jupyter kernelspec install " .. self.path .. " --user --name="
-  end
-
-  -- Add manager if it exists
   if manager then
     cmd = manager .. " run " .. tool .. name
   else
     cmd = tool .. name
   end
 
-  -- Run the command
   local output = vim.fn.systemlist(cmd)
   local exit_code = vim.v.shell_error
 
-  -- Check if the command was successful
   if exit_code ~= 0 then
-    -- Command failed, print an error message
     print("Error running command: " .. cmd)
     for _, line in ipairs(output) do
       print(line)
     end
   else
-    -- Command succeeded, print the output
     for _, line in ipairs(output) do
       print(line)
     end
@@ -46,7 +36,7 @@ function KernelManager:create_kernel(name, manager)
 end
 
 function KernelManager:delete_kernel(name, manager)
-  local cmd = "jupyter kernelspec remove " .. name
+  local cmd = "jupyter kernelspec remove " .. name .. " -y"
 
   if manager then
     cmd = manager .. " run " .. cmd

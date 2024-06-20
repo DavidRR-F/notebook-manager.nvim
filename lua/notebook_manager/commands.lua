@@ -11,20 +11,31 @@ local kernel = KernelManager:new()
 M.create_notebook = function(book_name)
   utils.ensure_directory_exists(config.options.dir)
   local notebook_file = book_name .. ".ipynb"
-  local file_path = config.options.dir .. "/" .. notebook_file
+  local file_path = config.options.notebook_dir .. "/" .. notebook_file
   local notebook = pyproject:notebook_metadata(notebook_file)
-  utils.create_file(file_path, vim.fn.json_encode(notebook))
-  print("Notebook created: " .. notebook_file)
+  local created = utils.create_file(file_path, vim.fn.json_encode(notebook))
+  if created then
+    print("Notebook created: " .. notebook_file)
+  else
+    print("Notebook already exists: " .. notebook_file)
+  end
 end
 
 M.delete_notebook = function(book_name)
-  local notebook_files = { book_name .. ".ipynb", book_name .. ".py" }
+  local notebook_files = { ".ipynb", ".py" }
+  local removed = false
   for i = 1, #notebook_files do
-    local file_path = config.options.dir .. "/" .. notebook_files[i]
+    local file_path = config.options.notebook_dir .. "/" .. book_name .. notebook_files[i]
     if vim.fn.filereadable(file_path) == 1 then
       os.remove(file_path)
-      print("Notebook Removed: " .. notebook_files[i])
+      removed = true
     end
+  end
+
+  if not removed then
+    print("Notebook not found: " .. book_name)
+  else
+    print("Notebook deleted: " .. book_name)
   end
 end
 

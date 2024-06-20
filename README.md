@@ -2,7 +2,7 @@
 
 
 
-### Dependecies
+### Python Dependecies
 - jupyter
 
 ```js
@@ -23,3 +23,9 @@ return {
   }
 }
 ```
+
+## TODO
+- Add env to kernel.json
+- Kernel/Notebook Listing
+- add ignore package manager option
+- add rye/pipenv package manager support

@@ -13,8 +13,10 @@ M.create_file = function(file, content)
   local path = Path:new(file)
   if not path:exists() then
     path:touch()
+    path:write(content, 'w')
+    return true
   end
-  path:write(content, 'w')
+  return false
 end
 
 return M
