@@ -29,7 +29,7 @@ end
 
 function TomlManager:find()
   local toml_files = { "pyproject.toml", "Pipfile" }
-  for i = 1, #self.toml_files do
+  for i = 1, #toml_files do
     if vim.fn.filereadable(toml_files[i]) == 1 then
       return toml_files[i]
     end
