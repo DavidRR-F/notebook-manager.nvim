@@ -1,14 +1,18 @@
 local utils = require('notebook_manager.utils')
 local config = require('notebook_manager.config')
+local PyProject = require('notebook_manager.toml_parcer.pyproject')
+local KernelManager = require('notebook_manager.kernel_manager.kernel')
+
 local M = {}
+
+local pyproject = PyProject:new()
+local kernel = KernelManager:new()
 
 -- Create a Jupyter notebook
 M.create_notebook = function(book_name)
   utils.ensure_directory_exists(config.options.dir)
   local notebook_file = book_name .. ".ipynb"
   local file_path = config.options.dir .. "/" .. notebook_file
-
-  local pyproject = utils.get_project_info()
 
   local notebook = {
     cells = {
@@ -70,8 +74,11 @@ M.delete_notebook = function(book_name)
 end
 
 M.create_kernel = function(kernel_name)
-  local pyproject = utils.get_project_info()
-  pyproject.manager:create_kernel(kernel_name, pyproject.manager.cli)
+  kernel:create_kernel(kernel_name, pyproject.manager.cli)
+end
+
+M.delete_kernel = function(kernel_name)
+  kernel:delete_kernel(kernel_name, pyproject.manager.cli)
 end
 
 -- Register Neovim commands
@@ -84,6 +91,9 @@ M.register_commands = function()
   end, { nargs = '?' })
   vim.api.nvim_create_user_command('CreateKernel', function(opts)
     M.create_kernel(opts.args)
+  end, { nargs = '?' })
+  vim.api.nvim_create_user_command('DeleteKernel', function(opts)
+    M.delete_kernel(opts.args)
   end, { nargs = '?' })
 end
 

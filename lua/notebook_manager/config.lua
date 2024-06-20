@@ -3,7 +3,6 @@ local M = {}
 M.options = {
   notebook_dir = "./notebooks",
   kernel_dir = "default",
-  kernel_tool = "ipykernel",
 }
 
 M.setup = function(opts)
