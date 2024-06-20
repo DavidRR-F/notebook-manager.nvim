@@ -70,3 +70,5 @@ function KernelManager:delete_kernel(name, manager)
     end
   end
 end
+
+return KernelManager
