@@ -22,7 +22,6 @@ local mt = {
 
 function PyProject:new(file_path)
   local instance = setmetatable({}, mt)
-  instance.found = true
   instance.file_path = file_path or "pyproject.toml"
   instance.manager = PackageManagerFactory:createManager(instance:load(file_path))
   return instance
@@ -36,6 +35,46 @@ function PyProject:load()
   local contents = file:read("*all")
   file:close()
   return toml.parse(contents)
+end
+
+function PyProject:notebook_metadata(name)
+  return {
+    cells = {
+      {
+        cell_type = "code",
+        execution_count = nil,
+        id = "95a5baa1",
+        metadata = { empty = true },
+        outputs = {},
+        source = { "" }
+      },
+    },
+    metadata = {
+      kernelspec = {
+        name = "python3",
+        display_name = "Python 3",
+        language = "python"
+      },
+      language_info = {
+        name = "python",
+        version = self.python_version,
+        mimetype = "text/x-python",
+        codemirror_mode = {
+          name = "ipython",
+          version = 3
+        },
+        pygments_lexer = "ipython3",
+        nbconvert_exporter = "python",
+        file_extension = ".py"
+      },
+      version = "1.0",
+      author = self.author,
+      description = self.description,
+      name = name
+    },
+    nbformat = 4,
+    nbformat_minor = 5
+  }
 end
 
 return PyProject
