@@ -1,5 +1,4 @@
 local config = require('notebook_manager.config')
-local utils = require('notebook_manager.utils')
 
 local KernelManager = {}
 KernelManager.__index = KernelManager

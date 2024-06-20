@@ -1,8 +1,8 @@
-local toml = require("notebook_manager.toml_parcer.toml")
-local PackageManagerFactory = require("notebook_manager.package_manager.factory")
+local toml = require("notebook_manager.toml.parcer")
+local PackageManagerFactory = require("notebook_manager.packages.factory")
 
-PyProject = {}
-PyProject.__index = PyProject
+TomlManager = {}
+TomlManager.__index = TomlManager
 
 local mt = {
   __index = function(tbl, key)
@@ -15,29 +15,39 @@ local mt = {
     elseif key == "python_version" then
       return tbl.manager:get_project_version()
     else
-      return rawget(tbl, key) or PyProject[key]
+      return rawget(tbl, key) or TomlManager[key]
     end
   end
 }
 
-function PyProject:new(file_path)
+function TomlManager:new()
   local instance = setmetatable({}, mt)
-  instance.file_path = file_path or "pyproject.toml"
-  instance.manager = PackageManagerFactory:createManager(instance:load(file_path))
+  instance.file = instance:find()
+  instance.manager = instance:load()
   return instance
 end
 
-function PyProject:load()
-  local file = io.open(self.file_path, "r")
-  if not file then
-    return nil
+function TomlManager:find()
+  local toml_files = { "pyproject.toml", "Pipfile" }
+  for i = 1, #self.toml_files do
+    if vim.fn.filereadable(toml_files[i]) == 1 then
+      return toml_files[i]
+    end
   end
-  local contents = file:read("*all")
-  file:close()
-  return toml.parse(contents)
+  return nil
 end
 
-function PyProject:notebook_metadata(name)
+function TomlManager:load()
+  local file = io.open(self.file, "r")
+  if file then
+    local contents = file:read("*all")
+    file:close()
+    return PackageManagerFactory:createManager(toml.parse(contents), self.file)
+  end
+  return nil
+end
+
+function TomlManager:notebook_metadata(name)
   return {
     cells = {
       {
@@ -77,4 +87,4 @@ function PyProject:notebook_metadata(name)
   }
 end
 
-return PyProject
+return TomlManager

@@ -1,13 +1,27 @@
 # Notebook Manager
 
+Notebook Manager let you create and manage jupyter notebooks and kernels via neovim.
+
+You can create notebooks and kernels using the active Python
+environment or with one of the supported package managers `poetry`, `rye`,
+`pipenv`. If your project directory has a toml configuration file the plugin
+will default to using your package manager to create kernels and notebook
+metadata
 
 
-### Python Dependecies
-- jupyter
+### Requirements
+- Neovim ^9.0
+- Python ^3.8
+- Required Python Packages
+    - `ipykernel` (for initializing kernels)
+    - `jupyter` (for managing existing kernels)
 
+### Installation
+
+##### Lazy.vim
 ```js
 return {
-  "DavidRR-F/notebook-manager",
+  "DavidRR-F/notebook-manager.nvim",
   dependencies = {
     "nvim-lua/plenary.nvim",
   },
@@ -19,7 +33,7 @@ return {
   },
   opts = {
     notebook_dir = "./notebooks",
-    kernel_dir = "default",
+    kernel_dir = "~/.local/share/jupyter/kernels",
   }
 }
 ```

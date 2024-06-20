@@ -1,18 +1,18 @@
 local utils = require('notebook_manager.utils')
 local config = require('notebook_manager.config')
-local PyProject = require('notebook_manager.toml_parcer.pyproject')
-local KernelManager = require('notebook_manager.kernel_manager.kernel')
+local TomlManager = require('notebook_manager.toml.manager')
+local KernelManager = require('notebook_manager.kernel.manager')
 
 local M = {}
 
-local pyproject = PyProject:new()
+local project = TomlManager:new()
 local kernel = KernelManager:new()
 
 M.create_notebook = function(book_name)
   utils.ensure_directory_exists(config.options.dir)
   local notebook_file = book_name .. ".ipynb"
   local file_path = config.options.notebook_dir .. "/" .. notebook_file
-  local notebook = pyproject:notebook_metadata(notebook_file)
+  local notebook = project:notebook_metadata(notebook_file)
   local created = utils.create_file(file_path, vim.fn.json_encode(notebook))
   if created then
     print("Notebook created: " .. notebook_file)
@@ -40,11 +40,11 @@ M.delete_notebook = function(book_name)
 end
 
 M.create_kernel = function(kernel_name)
-  kernel:create_kernel(kernel_name, pyproject.manager.cli)
+  kernel:create_kernel(kernel_name, project.manager.cli)
 end
 
 M.delete_kernel = function(kernel_name)
-  kernel:delete_kernel(kernel_name, pyproject.manager.cli)
+  kernel:delete_kernel(kernel_name, project.manager.cli)
 end
 
 -- Register Neovim commands
