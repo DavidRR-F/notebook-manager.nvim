@@ -47,6 +47,9 @@ function KernelMenu:show()
   vim.api.nvim_buf_set_keymap(buf, 'n', 'd',
     [[<cmd>lua require('notebook_manager.commands').kernel_menu_delete()<CR>]],
     { noremap = true, silent = true })
+  vim.api.nvim_buf_set_keymap(buf, 'n', 'a',
+    [[<cmd>lua require('notebook_manager.commands').kernel_menu_create()<CR>]],
+    { noremap = true, silent = true })
   vim.api.nvim_buf_set_keymap(buf, 'n', 'q', '<cmd>bwipeout!<CR>', { noremap = true, silent = true })
 
   -- Disable left/right movement
@@ -57,6 +60,34 @@ function KernelMenu:show()
   vim.api.nvim_buf_set_keymap(buf, 'n', 'k', 'gk', { noremap = true, silent = true })
   vim.api.nvim_buf_set_keymap(buf, 'n', 'j', 'gj', { noremap = true, silent = true })
   vim.api.nvim_buf_set_var(buf, 'kernels', kernels)
+end
+
+function KernelMenu:create()
+  local exit = function(j, return_val)
+    if return_val == 0 then
+      vim.schedule(function()
+        local buf = vim.api.nvim_get_current_buf()
+        local kernels = vim.api.nvim_buf_get_var(buf, 'kernels')
+        local result = table.concat(j:result(), "\n")                                 -- Join job output lines
+        local new_kernel_name = string.match(result, "Installed kernelspec (%S+) in") -- Extract kernel name
+
+        if new_kernel_name then
+          table.insert(kernels, new_kernel_name)
+          -- Update the buffer with the new list of kernels
+          vim.api.nvim_buf_set_lines(buf, 0, -1, false, kernels)
+          -- Update the kernels variable in the buffer
+          vim.api.nvim_buf_set_var(buf, 'kernels', kernels)
+        else
+          vim.notify("Failed to create kernel", vim.log.levels.ERROR)
+        end
+      end)
+    end
+  end
+  vim.ui.input({ prompt = "Create kernel (name): " }, function(input)
+    if input then
+      self.manager:create_kernel(input, self.package, exit)
+    end
+  end)
 end
 
 function KernelMenu:delete()
@@ -81,7 +112,7 @@ function KernelMenu:delete()
       end)
     end
   end
-  vim.ui.input({ prompt = "Delete kernel: " .. kernel_name .. " [y/n]? " }, function(input)
+  vim.ui.input({ prompt = "Delete kernel " .. kernel_name .. " [y/n]: " }, function(input)
     if input == 'y' then
       self.manager:delete_kernel(kernel_name, self.package, exit)
     end

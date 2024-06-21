@@ -7,6 +7,13 @@ KernelManager.__index = KernelManager
 local function new()
   local instance = setmetatable({}, KernelManager)
   instance.path = config.options.kernel_dir
+  instance.std_fn = function(err, data)
+    if err then
+      vim.notify(err)
+    elseif data then
+      vim.notify(data)
+    end
+  end
   return instance
 end
 
@@ -17,41 +24,29 @@ function KernelManager:get_instance()
   return self.instance
 end
 
-function KernelManager:create_kernel(name, package)
+function KernelManager:create_kernel(name, package, on_exit)
   local cmd
-  local tool = "python -m ipykernel install --user --name="
+  local args
 
   if package then
-    cmd = package.manager.cli .. " run " .. tool .. name
+    cmd = package.manager.cli
+    args = { "run", "python", "-m", "ipykernel", "install", "--user", "--name=" .. name }
   else
-    cmd = tool .. name
+    cmd = "python"
+    args = { "-m", "ipykernel", "install", "--user", "--name=" .. name }
   end
 
-  local output = vim.fn.systemlist(cmd)
-  local exit_code = vim.v.shell_error
-
-  if exit_code ~= 0 then
-    print("Error running command: " .. cmd)
-    for _, line in ipairs(output) do
-      print(line)
-    end
-  else
-    for _, line in ipairs(output) do
-      print(line)
-    end
-  end
+  Job:new({
+    command = cmd,
+    args = args,
+    on_stdout = self.std_fn,
+    on_exit = on_exit
+  }):sync()
 end
 
 function KernelManager:delete_kernel(name, package, on_exit)
   local cmd
   local args
-  local std_fn = function(err, data)
-    if err then
-      vim.notify(err)
-    elseif data then
-      vim.notify(data)
-    end
-  end
 
   if package then
     cmd = package.manager.cli
@@ -64,7 +59,7 @@ function KernelManager:delete_kernel(name, package, on_exit)
   Job:new({
     command = cmd,
     args = args,
-    on_stdout = std_fn,
+    on_stdout = self.std_fn,
     on_exit = on_exit
   }):sync()
 end
