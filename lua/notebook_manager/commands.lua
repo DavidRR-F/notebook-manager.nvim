@@ -63,8 +63,12 @@ M.delete_kernel = function(kernel_name)
   end
 end
 
-M.kernel_menu = function()
+M.kernel_menu_show = function()
   menu:show()
+end
+
+M.kernel_menu_delete = function()
+  menu:delete()
 end
 
 -- Register Neovim commands
@@ -82,7 +86,7 @@ M.register_commands = function()
     M.delete_kernel(opts.args)
   end, { nargs = '?' })
   vim.api.nvim_create_user_command('ShowKernels', function()
-    M.kernel_menu()
+    M.kernel_menu_show()
   end, { nargs = '?' })
 end
 

@@ -6,8 +6,11 @@ M.options = {
   ignore_package_manager = false,
 }
 
-M.setup = function(opts)
+M.keymaps = {}
+
+M.setup = function(opts, keys)
   M.options = vim.tbl_deep_extend("force", M.options, opts or {})
+  M.keymaps = vim.tbl_deep_extend("force", M.keymaps, keys or {})
 end
 
 return M

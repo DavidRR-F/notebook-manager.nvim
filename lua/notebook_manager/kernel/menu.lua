@@ -45,7 +45,7 @@ function KernelMenu:show()
 
   -- Register keymaps
   vim.api.nvim_buf_set_keymap(buf, 'n', 'd',
-    [[<cmd>lua require('notebook_manager.kernel.menu').get_instance():delete()<CR>]],
+    [[<cmd>lua require('notebook_manager.commands').kernel_menu_delete()<CR>]],
     { noremap = true, silent = true })
   vim.api.nvim_buf_set_keymap(buf, 'n', 'q', '<cmd>bwipeout!<CR>', { noremap = true, silent = true })
 
@@ -83,7 +83,7 @@ function KernelMenu:delete()
   end
   vim.ui.input({ prompt = "Delete kernel: " .. kernel_name .. " [y/n]? " }, function(input)
     if input == 'y' then
-      self.manager:delete_kernel(kernel_name, self.package.manager.cli, exit)
+      self.manager:delete_kernel(kernel_name, self.package, exit)
     end
   end)
 end

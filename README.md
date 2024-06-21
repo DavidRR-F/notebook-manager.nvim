@@ -25,16 +25,19 @@ return {
   dependencies = {
     "nvim-lua/plenary.nvim",
   },
-  cmd = { 
-    "CreateBook", 
-    "DeleteBook", 
+  cmd = {
+    "CreateBook",
+    "DeleteBook",
     "CreateKernel",
     "DeleteKernel",
+    "ShowKernels",
   },
   opts = {
-    notebook_dir = "./notebooks", -- notebook directory
-    kernel_dir = "~/.local/share/jupyter/kernels", -- kernel directory
-    ignore_package_manager = false, -- dont use package manager
+    notebook_dir = "./notebooks",
+    kernel_dir = "default",
+  },
+  keys = {
+    { "<leader>ks", "<cmd>:ShowKernels<cr>", desc = "Show Kernels" },
   }
 }
 ```
