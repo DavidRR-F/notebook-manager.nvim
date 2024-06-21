@@ -5,15 +5,20 @@ local KernelManager = require('notebook_manager.kernel.manager')
 
 local M = {}
 
-local project = TomlManager:new()
+local project = TomlManager:new(utils.get_toml_path())
 local kernel = KernelManager:new()
 
 M.create_notebook = function(book_name)
-  utils.ensure_directory_exists(config.options.dir)
+  utils.ensure_directory_exists(config.options.notebook_dir)
   local notebook_file = book_name .. ".ipynb"
   local file_path = config.options.notebook_dir .. "/" .. notebook_file
-  local notebook = project:notebook_metadata(notebook_file)
-  local created = utils.create_file(file_path, vim.fn.json_encode(notebook))
+  local metedata
+  if project and not config.options.ignore_package_manager then
+    metedata = project:notebook_metadata(notebook_file)
+  else
+    metedata = utils.generic_metadata(notebook_file)
+  end
+  local created = utils.create_file(file_path, vim.fn.json_encode(metedata))
   if created then
     print("Notebook created: " .. notebook_file)
   else
@@ -40,11 +45,19 @@ M.delete_notebook = function(book_name)
 end
 
 M.create_kernel = function(kernel_name)
-  kernel:create_kernel(kernel_name, project.manager.cli)
+  if config.options.ignore_package_manager then
+    kernel:create_kernel(kernel_name)
+  else
+    kernel:create_kernel(kernel_name, project)
+  end
 end
 
 M.delete_kernel = function(kernel_name)
-  kernel:delete_kernel(kernel_name, project.manager.cli)
+  if config.options.ignore_package_manager then
+    kernel:delete_kernel(kernel_name)
+  else
+    kernel:delete_kernel(kernel_name, project)
+  end
 end
 
 -- Register Neovim commands

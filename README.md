@@ -19,7 +19,7 @@ metadata
 ### Installation
 
 ##### Lazy.vim
-```js
+```lua
 return {
   "DavidRR-F/notebook-manager.nvim",
   dependencies = {
@@ -32,14 +32,9 @@ return {
     "DeleteKernel",
   },
   opts = {
-    notebook_dir = "./notebooks",
-    kernel_dir = "~/.local/share/jupyter/kernels",
+    notebook_dir = "./notebooks", -- notebook directory
+    kernel_dir = "~/.local/share/jupyter/kernels", -- kernel directory
+    ignore_package_manager = false, -- dont use package manager
   }
 }
 ```
-
-## TODO
-- Add env to kernel.json
-- Kernel/Notebook Listing
-- add ignore package manager option
-- add rye/pipenv package manager support

@@ -1,5 +1,6 @@
 local toml = require("notebook_manager.toml.parcer")
 local PackageManagerFactory = require("notebook_manager.packages.factory")
+local Path = require("plenary.path")
 
 TomlManager = {}
 TomlManager.__index = TomlManager
@@ -20,28 +21,20 @@ local mt = {
   end
 }
 
-function TomlManager:new()
+function TomlManager:new(file_path)
+  if not file_path then
+    return nil
+  end
   local instance = setmetatable({}, mt)
-  instance.file = instance:find()
+  instance.file = file_path
   instance.manager = instance:load()
   return instance
 end
 
-function TomlManager:find()
-  local toml_files = { "pyproject.toml", "Pipfile" }
-  for i = 1, #toml_files do
-    if vim.fn.filereadable(toml_files[i]) == 1 then
-      return toml_files[i]
-    end
-  end
-  return nil
-end
-
 function TomlManager:load()
-  local file = io.open(self.file, "r")
-  if file then
-    local contents = file:read("*all")
-    file:close()
+  local path = Path:new(self.file)
+  if path:exists() then
+    local contents = path:read()
     return PackageManagerFactory:createManager(toml.parse(contents), self.file)
   end
   return nil

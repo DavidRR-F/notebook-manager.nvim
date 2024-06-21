@@ -10,12 +10,12 @@ function KernelManager:new()
   return instance
 end
 
-function KernelManager:create_kernel(name, manager)
+function KernelManager:create_kernel(name, package)
   local cmd
   local tool = "python -m ipykernel install --user --name="
 
-  if manager then
-    cmd = manager .. " run " .. tool .. name
+  if package then
+    cmd = package.manager.cli .. " run " .. tool .. name
   else
     cmd = tool .. name
   end
@@ -35,7 +35,7 @@ function KernelManager:create_kernel(name, manager)
   end
 end
 
-function KernelManager:delete_kernel(name, manager, on_exit)
+function KernelManager:delete_kernel(name, package, on_exit)
   local cmd
   local args
   local std_fn = function(err, data)
@@ -46,8 +46,8 @@ function KernelManager:delete_kernel(name, manager, on_exit)
     end
   end
 
-  if manager then
-    cmd = manager
+  if package then
+    cmd = package.manager.cli
     args = { "run", "jupyter", "kernelspec", "remove", name, "-y" }
   else
     cmd = "jupyter"
@@ -62,13 +62,13 @@ function KernelManager:delete_kernel(name, manager, on_exit)
   }):sync()
 end
 
-function KernelManager:get_kernels(manager)
+function KernelManager:get_kernels(package)
   local results = {}
   local command
   local args
 
-  if manager then
-    command = manager
+  if package then
+    command = package.manager.cli
     args = { "run", "jupyter", "kernelspec", "list" }
   else
     command = "jupyter"

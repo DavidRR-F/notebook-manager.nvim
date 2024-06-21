@@ -1,0 +1,52 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Lua specific
+*.luac
+
+# Vim swap files
+*.swp
+*.swo
+*.swm
+
+# Vim backup files
+*.bak
+*.tmp
+
+# Vim session files
+Session.vim
+
+# Tags
+tags
+.tags
+
+# Directories created by test runners or build systems
+test_output/
+build/
+node_modules/
+
+# Logs and temporary files
+logs/
+*.log
+*.out
+*.err
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Coverage reports
+coverage/
+coverage*.json
+.nyc_output/
+
+# Plugin specific files
+plugin/
+autoload/
+after/
+doc/tags
+*.zip
+*.tar.gz
+
