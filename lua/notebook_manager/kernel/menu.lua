@@ -11,9 +11,13 @@ local function new()
   instance.package = TomlManager:get_instance()
   instance.borderchars = { "─", "│", "─", "│", "╭", "╮", "╯", "╰" }
   instance.width = 50
-  instance.height = 20
+  instance.maxheight = 20
+  instance.minheight = 10
   instance.zindex = 100
   instance.title = "Jupyter Kernels"
+  instance.buf = nil
+  instance.win = nil
+  instance.kernels = {}
   return instance
 end
 
@@ -25,58 +29,74 @@ function KernelMenu:get_instance()
 end
 
 function KernelMenu:show()
-  local kernels = self.manager:get_kernels(self.package)
-  local menu = popup.create(
-    kernels,
+  self.kernels = self.manager:get_kernels(self.package)
+  self.win = popup.create(
+    self.kernels,
     {
       title = self.title,
       highlight = "Normal",
       borderhighlight = "FloatBorder",
-      line = math.floor((vim.o.lines - self.height) / 2),
+      cursorline = true,
+      maxwidth = self.width,
+      maxheight = self.maxheight,
+      line = math.floor((vim.o.lines - self.minheight) / 2),
       col = math.floor((vim.o.columns - self.width) / 2),
       minwidth = self.width,
-      minheight = self.height,
+      minheight = self.minheight,
       borderchars = self.borderchars,
       zindex = self.zindex
     }
   )
 
-  local buf = vim.api.nvim_win_get_buf(menu)
+  self.buf = vim.api.nvim_win_get_buf(self.win)
 
   -- Register keymaps
-  vim.api.nvim_buf_set_keymap(buf, 'n', 'd',
+  vim.api.nvim_buf_set_keymap(self.buf, 'n', 'd',
     [[<cmd>lua require('notebook_manager.commands').kernel_menu_delete()<CR>]],
     { noremap = true, silent = true })
-  vim.api.nvim_buf_set_keymap(buf, 'n', 'a',
+  vim.api.nvim_buf_set_keymap(self.buf, 'n', 'a',
     [[<cmd>lua require('notebook_manager.commands').kernel_menu_create()<CR>]],
     { noremap = true, silent = true })
-  vim.api.nvim_buf_set_keymap(buf, 'n', 'q', '<cmd>bwipeout!<CR>', { noremap = true, silent = true })
+  vim.api.nvim_buf_set_keymap(self.buf, 'n', 'q', '<cmd>bwipeout!<CR>', { noremap = true, silent = true })
 
   -- Disable left/right movement
-  vim.api.nvim_buf_set_keymap(buf, 'n', 'h', '', { noremap = true, silent = true })
-  vim.api.nvim_buf_set_keymap(buf, 'n', 'l', '', { noremap = true, silent = true })
+  vim.api.nvim_buf_set_keymap(self.buf, 'n', 'h', '', { noremap = true, silent = true })
+  vim.api.nvim_buf_set_keymap(self.buf, 'n', 'l', '', { noremap = true, silent = true })
+  vim.api.nvim_buf_set_var(self.buf, 'kernels', self.kernels)
+  vim.api.nvim_create_autocmd("CursorMoved", {
+    buffer = self.buf,
+    callback = function()
+      self:update_lines()
+    end
+  })
 
-  -- Disable movement in the header
-  vim.api.nvim_buf_set_keymap(buf, 'n', 'k', 'gk', { noremap = true, silent = true })
-  vim.api.nvim_buf_set_keymap(buf, 'n', 'j', 'gj', { noremap = true, silent = true })
-  vim.api.nvim_buf_set_var(buf, 'kernels', kernels)
+  -- Initial highlight update
+  self:update_lines()
+end
+
+function KernelMenu:update_lines()
+  local lines = {}
+  local current_line = vim.api.nvim_win_get_cursor(self.win)[1]
+  for i, kernel in ipairs(self.kernels) do
+    if i == current_line then
+      table.insert(lines, "> " .. kernel)
+    else
+      table.insert(lines, "  " .. kernel)
+    end
+  end
+  vim.api.nvim_buf_set_lines(self.buf, 0, -1, false, lines)
 end
 
 function KernelMenu:create()
   local exit = function(j, return_val)
     if return_val == 0 then
       vim.schedule(function()
-        local buf = vim.api.nvim_get_current_buf()
-        local kernels = vim.api.nvim_buf_get_var(buf, 'kernels')
-        local result = table.concat(j:result(), "\n")                                 -- Join job output lines
-        local new_kernel_name = string.match(result, "Installed kernelspec (%S+) in") -- Extract kernel name
-
+        local result = table.concat(j:result(), "\n")
+        local new_kernel_name = string.match(result, "Installed kernelspec (%S+) in")
         if new_kernel_name then
-          table.insert(kernels, new_kernel_name)
-          -- Update the buffer with the new list of kernels
-          vim.api.nvim_buf_set_lines(buf, 0, -1, false, kernels)
-          -- Update the kernels variable in the buffer
-          vim.api.nvim_buf_set_var(buf, 'kernels', kernels)
+          table.insert(self.kernels, new_kernel_name)
+          vim.api.nvim_buf_set_lines(self.buf, 0, -1, false, self.kernels)
+          vim.api.nvim_buf_set_var(self.buf, 'kernels', self.kernels)
         else
           vim.notify("Failed to create kernel", vim.log.levels.ERROR)
         end
@@ -91,24 +111,19 @@ function KernelMenu:create()
 end
 
 function KernelMenu:delete()
-  local buf = vim.api.nvim_get_current_buf()
   local line = vim.api.nvim_win_get_cursor(0)[1]
-  local kernels = vim.api.nvim_buf_get_var(buf, 'kernels')
-  local kernel_name = kernels[line]
+  local kernel_name = self.kernels[line]
   local exit = function(j, return_val)
     if return_val == 0 then
       vim.schedule(function()
-        -- Remove the deleted kernel from the list
-        for i, k in ipairs(kernels) do
+        for i, k in ipairs(self.kernels) do
           if k == kernel_name then
-            table.remove(kernels, i)
+            table.remove(self.kernels, i)
             break
           end
         end
-        -- Update the buffer with the new list of kernels
-        vim.api.nvim_buf_set_lines(buf, 0, -1, false, kernels)
-        -- Update the kernels variable in the buffer
-        vim.api.nvim_buf_set_var(buf, 'kernels', kernels)
+        vim.api.nvim_buf_set_lines(self.buf, 0, -1, false, self.kernels)
+        vim.api.nvim_buf_set_var(self.buf, 'kernels', self.kernels)
       end)
     end
   end

@@ -37,7 +37,11 @@ return {
     kernel_dir = "default",
   },
   keys = {
-    { "<leader>ks", "<cmd>:ShowKernels<cr>", desc = "Show Kernels" },
+    { "<leader>km", "<cmd>:ShowKernels<cr>", desc = "Show Kernels" },
   }
 }
 ```
+
+### Kernel Menu
+- `a`: Create a new kernel 
+- `d`: Delete selected kernel
