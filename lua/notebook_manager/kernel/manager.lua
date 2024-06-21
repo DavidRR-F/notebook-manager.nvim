@@ -35,30 +35,31 @@ function KernelManager:create_kernel(name, manager)
   end
 end
 
-function KernelManager:delete_kernel(name, manager)
-  local cmd = "jupyter kernelspec remove " .. name .. " -y"
+function KernelManager:delete_kernel(name, manager, on_exit)
+  local cmd
+  local args
+  local std_fn = function(err, data)
+    if err then
+      vim.notify(err)
+    elseif data then
+      vim.notify(data)
+    end
+  end
 
   if manager then
-    cmd = manager .. " run " .. cmd
-  end
-
-  -- Run the command
-  local output = vim.fn.systemlist(cmd)
-  local exit_code = vim.v.shell_error
-
-  -- Check if the command was successful
-  if exit_code ~= 0 then
-    -- Command failed, print an error message
-    print("Error running command: " .. cmd)
-    for _, line in ipairs(output) do
-      print(line)
-    end
+    cmd = manager
+    args = { "run", "jupyter", "kernelspec", "remove", name, "-y" }
   else
-    -- Command succeeded, print the output
-    for _, line in ipairs(output) do
-      print(line)
-    end
+    cmd = "jupyter"
+    args = { "kernelspec", "remove", name, "-y" }
   end
+
+  Job:new({
+    command = cmd,
+    args = args,
+    on_stdout = std_fn,
+    on_exit = on_exit
+  }):sync()
 end
 
 function KernelManager:get_kernels(manager)

@@ -2,11 +2,13 @@ local utils = require('notebook_manager.utils')
 local config = require('notebook_manager.config')
 local TomlManager = require('notebook_manager.toml.manager')
 local KernelManager = require('notebook_manager.kernel.manager')
+local KernelMenu = require('notebook_manager.kernel.menu')
 
 local M = {}
 
 local project = TomlManager:new()
 local kernel = KernelManager:new()
+local menu = KernelMenu:new()
 
 M.create_notebook = function(book_name)
   utils.ensure_directory_exists(config.options.dir)
@@ -44,54 +46,11 @@ M.create_kernel = function(kernel_name)
 end
 
 M.delete_kernel = function(kernel_name)
-  if not kernel_name then
-    local buf = vim.api.nvim_get_current_buf()
-    local line = vim.api.nvim_win_get_cursor(0)[1]
-    local kernels = vim.api.nvim_buf_get_var(buf, 'kernels')
-    kernel_name = kernels[line]
-  end
-
-  if kernel_name then
-    local fn = function(param)
-      kernel:delete_kernel(param, project.manager.cli)
-    end
-    utils.confirm_prompt('Delete kernel: %s?', kernel_name, fn)
-  else
-    vim.notify('No kernel name provided.', vim.log.levels.ERROR)
-  end
+  kernel:delete_kernel(kernel_name, project.manager.cli)
 end
 
 M.show_kernels = function()
-  local kernels = kernel:get_kernels(project.manager.cli)
-  if vim.tbl_isempty(kernels) then
-    vim.notify('No Jupyter kernels found.')
-    return
-  end
-
-  local window_options = {
-    title = 'Jupyter Kernels',
-    width = 50,
-    height = 20,
-  }
-
-  local menu = utils.menu(kernels, window_options)
-
-  local buf = vim.api.nvim_win_get_buf(menu)
-
-  -- Register keymaps
-  vim.api.nvim_buf_set_keymap(buf, 'n', 'd',
-    [[<cmd>lua require('notebook_manager.commands').delete_kernel()<CR>]],
-    { noremap = true, silent = true })
-  vim.api.nvim_buf_set_keymap(buf, 'n', 'q', '<cmd>bwipeout!<CR>', { noremap = true, silent = true })
-
-  -- Disable left/right movement
-  vim.api.nvim_buf_set_keymap(buf, 'n', 'h', '', { noremap = true, silent = true })
-  vim.api.nvim_buf_set_keymap(buf, 'n', 'l', '', { noremap = true, silent = true })
-
-  -- Disable movement in the header
-  vim.api.nvim_buf_set_keymap(buf, 'n', 'k', 'gk', { noremap = true, silent = true })
-  vim.api.nvim_buf_set_keymap(buf, 'n', 'j', 'gj', { noremap = true, silent = true })
-  vim.api.nvim_buf_set_var(buf, 'kernels', kernels)
+  menu:show()
 end
 
 -- Register Neovim commands
