@@ -4,10 +4,17 @@ local Job = require('plenary.job')
 local KernelManager = {}
 KernelManager.__index = KernelManager
 
-function KernelManager:new()
+local function new()
   local instance = setmetatable({}, KernelManager)
   instance.path = config.options.kernel_dir
   return instance
+end
+
+function KernelManager:get_instance()
+  if not self.instance then
+    self.instance = new()
+  end
+  return self.instance
 end
 
 function KernelManager:create_kernel(name, package)

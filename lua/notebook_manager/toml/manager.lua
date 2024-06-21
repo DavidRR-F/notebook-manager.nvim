@@ -1,5 +1,6 @@
 local toml = require("notebook_manager.toml.parcer")
 local PackageManagerFactory = require("notebook_manager.packages.factory")
+local utils = require("notebook_manager.utils")
 local Path = require("plenary.path")
 
 TomlManager = {}
@@ -21,7 +22,7 @@ local mt = {
   end
 }
 
-function TomlManager:new(file_path)
+local function new(file_path)
   if not file_path then
     return nil
   end
@@ -29,6 +30,13 @@ function TomlManager:new(file_path)
   instance.file = file_path
   instance.manager = instance:load()
   return instance
+end
+
+function TomlManager:get_instance()
+  if not self.instance then
+    self.instance = new(utils.get_toml_path())
+  end
+  return self.instance
 end
 
 function TomlManager:load()
