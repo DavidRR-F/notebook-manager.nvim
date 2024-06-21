@@ -2,11 +2,11 @@
 
 Notebook Manager let you create and manage jupyter notebooks and kernels via neovim.
 
-You can create notebooks and kernels using the active Python
+You can create notebooks and kernels using the active python
 environment or with one of the supported package managers `poetry`, `rye`,
 `pipenv`. If your project directory has a toml configuration file the plugin
-will default to using your package manager to create kernels and notebook
-metadata
+will default to using your package manager running commands and populating
+notebook metadata
 
 
 ### Requirements
@@ -34,7 +34,7 @@ return {
   },
   opts = {
     notebook_dir = "./notebooks",
-    kernel_dir = "default",
+    ignore_package_manager = false,
   },
   keys = {
     { "<leader>km", "<cmd>:ShowKernels<cr>", desc = "Show Kernels" },
@@ -43,5 +43,6 @@ return {
 ```
 
 ### Kernel Menu
+- `j/k`: Navigate Menu
 - `a`: Create a new kernel 
 - `d`: Delete selected kernel
