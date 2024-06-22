@@ -50,6 +50,38 @@ function KernelMenu:show()
 
   self.buf = vim.api.nvim_win_get_buf(self.win)
 
+  vim.bo[self.buf].buftype = 'nofile'
+  vim.bo[self.buf].bufhidden = 'wipe'
+  vim.bo[self.buf].filetype = 'popup'
+
+  vim.api.nvim_command('highlight PopupCursor guifg=none guibg=none')
+
+  -- Register keymapsfunction KernelMenu:show()
+  self.kernels = self.manager:get_kernels(self.package)
+  self.win = popup.create(
+    self.kernels,
+    {
+      title = self.title,
+      highlight = "Normal",
+      borderhighlight = "FloatBorder",
+      cursorline = true,
+      maxwidth = self.width,
+      maxheight = self.maxheight,
+      line = math.floor((vim.o.lines - self.minheight) / 2),
+      col = math.floor((vim.o.columns - self.width) / 2),
+      minwidth = self.width,
+      minheight = self.minheight,
+      borderchars = self.borderchars,
+      zindex = self.zindex
+    }
+  )
+
+  self.buf = vim.api.nvim_win_get_buf(self.win)
+
+  vim.bo[self.buf].buftype = 'nofile'
+  vim.bo[self.buf].bufhidden = 'wipe'
+  vim.bo[self.buf].filetype = 'popup'
+
   -- Register keymaps
   vim.api.nvim_buf_set_keymap(self.buf, 'n', 'd',
     [[<cmd>lua require('notebook_manager.commands').kernel_menu_delete()<CR>]],
@@ -59,10 +91,27 @@ function KernelMenu:show()
     { noremap = true, silent = true })
   vim.api.nvim_buf_set_keymap(self.buf, 'n', 'q', '<cmd>bwipeout!<CR>', { noremap = true, silent = true })
 
-  -- Disable left/right movement
+  -- Disable Keys
   vim.api.nvim_buf_set_keymap(self.buf, 'n', 'h', '', { noremap = true, silent = true })
   vim.api.nvim_buf_set_keymap(self.buf, 'n', 'l', '', { noremap = true, silent = true })
+  vim.api.nvim_buf_set_keymap(self.buf, 'n', '<Left>', '', { noremap = true, silent = true })
+  vim.api.nvim_buf_set_keymap(self.buf, 'n', '<Right>', '', { noremap = true, silent = true })
+
   vim.api.nvim_buf_set_var(self.buf, 'kernels', self.kernels)
+
+  -- Triggers
+  vim.api.nvim_create_autocmd('BufLeave', {
+    buffer = self.buf,
+    callback = function()
+      vim.defer_fn(function()
+        if vim.api.nvim_get_current_win() ~= self.win or vim.api.nvim_get_current_buf() ~= self.buf then
+          vim.api.nvim_set_current_win(self.win)
+          vim.api.nvim_echo({ { 'Notebook Manager: Press q to exit menu', 'WarningMsg' } }, false, {})
+        end
+      end, 10)
+    end,
+  })
+
   vim.api.nvim_create_autocmd("CursorMoved", {
     buffer = self.buf,
     callback = function()
@@ -70,7 +119,6 @@ function KernelMenu:show()
     end
   })
 
-  -- Initial highlight update
   self:update_lines()
 end
 

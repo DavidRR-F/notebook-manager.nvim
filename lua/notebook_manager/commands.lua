@@ -89,7 +89,7 @@ M.register_commands = function()
   vim.api.nvim_create_user_command('DeleteKernel', function(opts)
     M.delete_kernel(opts.args)
   end, { nargs = '?' })
-  vim.api.nvim_create_user_command('ShowKernels', function()
+  vim.api.nvim_create_user_command('KernelMenu', function()
     M.kernel_menu_show()
   end, { nargs = '?' })
 end
