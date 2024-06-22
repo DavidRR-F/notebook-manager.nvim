@@ -75,6 +75,10 @@ M.kernel_menu_create = function()
   menu:create()
 end
 
+M.kernel_menu_close = function()
+  menu:close()
+end
+
 -- Register Neovim commands
 M.register_commands = function()
   vim.api.nvim_create_user_command('CreateBook', function(opts)

@@ -56,7 +56,6 @@ function KernelMenu:show()
 
   vim.api.nvim_command('highlight PopupCursor guifg=none guibg=none')
 
-  -- Register keymapsfunction KernelMenu:show()
   self.kernels = self.manager:get_kernels(self.package)
   self.win = popup.create(
     self.kernels,
@@ -89,7 +88,9 @@ function KernelMenu:show()
   vim.api.nvim_buf_set_keymap(self.buf, 'n', 'a',
     [[<cmd>lua require('notebook_manager.commands').kernel_menu_create()<CR>]],
     { noremap = true, silent = true })
-  vim.api.nvim_buf_set_keymap(self.buf, 'n', 'q', '<cmd>bwipeout!<CR>', { noremap = true, silent = true })
+  vim.api.nvim_buf_set_keymap(self.buf, 'n', 'q',
+    [[<cmd>lua require('notebook_manager.commands').kernel_menu_close()<CR>]],
+    { noremap = true, silent = true })
 
   -- Disable Keys
   vim.api.nvim_buf_set_keymap(self.buf, 'n', 'h', '', { noremap = true, silent = true })
@@ -105,8 +106,10 @@ function KernelMenu:show()
     callback = function()
       vim.defer_fn(function()
         if vim.api.nvim_get_current_win() ~= self.win or vim.api.nvim_get_current_buf() ~= self.buf then
-          vim.api.nvim_set_current_win(self.win)
-          vim.api.nvim_echo({ { 'Notebook Manager: Press q to exit menu', 'WarningMsg' } }, false, {})
+          if self.win ~= nil then
+            vim.api.nvim_set_current_win(self.win)
+            vim.api.nvim_echo({ { 'Notebook Manager: Press q to exit menu', 'WarningMsg' } }, false, {})
+          end
         end
       end, 10)
     end,
@@ -180,6 +183,13 @@ function KernelMenu:delete()
       self.manager:delete_kernel(kernel_name, self.package, exit)
     end
   end)
+end
+
+function KernelMenu:close()
+  vim.api.nvim_win_close(self.win, true)
+  vim.api.nvim_command('bd')
+  self.win = nil
+  self.buf = nil
 end
 
 return KernelMenu
