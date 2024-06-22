@@ -2,11 +2,14 @@ local utils = require('notebook_manager.utils')
 local config = require('notebook_manager.config')
 local TomlManager = require('notebook_manager.toml.manager')
 local KernelManager = require('notebook_manager.kernel.manager')
+local KernelMenu = require('notebook_manager.kernel.menu')
 
 local M = {}
 
-local project = TomlManager:new(utils.get_toml_path())
-local kernel = KernelManager:new()
+local project = TomlManager:get_instance()
+local kernel = KernelManager:get_instance()
+local menu = KernelMenu:get_instance()
+
 
 M.create_notebook = function(book_name)
   utils.ensure_directory_exists(config.options.notebook_dir)
@@ -60,6 +63,18 @@ M.delete_kernel = function(kernel_name)
   end
 end
 
+M.kernel_menu_show = function()
+  menu:show()
+end
+
+M.kernel_menu_delete = function()
+  menu:delete()
+end
+
+M.kernel_menu_create = function()
+  menu:create()
+end
+
 -- Register Neovim commands
 M.register_commands = function()
   vim.api.nvim_create_user_command('CreateBook', function(opts)
@@ -73,6 +88,9 @@ M.register_commands = function()
   end, { nargs = '?' })
   vim.api.nvim_create_user_command('DeleteKernel', function(opts)
     M.delete_kernel(opts.args)
+  end, { nargs = '?' })
+  vim.api.nvim_create_user_command('KernelMenu', function()
+    M.kernel_menu_show()
   end, { nargs = '?' })
 end
 
