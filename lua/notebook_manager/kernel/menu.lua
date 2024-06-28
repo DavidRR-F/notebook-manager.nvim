@@ -28,7 +28,7 @@ function KernelMenu:get_instance()
   return self.instance
 end
 
-function KernelMenu:show()
+function KernelMenu:open()
   self.kernels = self.manager:get_kernels(self.package)
   self.win = popup.create(
     self.kernels,
@@ -190,6 +190,14 @@ function KernelMenu:close()
   vim.api.nvim_command('bd')
   self.win = nil
   self.buf = nil
+end
+
+function KernelMenu:toggle()
+  if self.win ~= nil and vim.api.nvim_win_is_valid(self.win) then
+    self:close()
+    return
+  end
+  self:open()
 end
 
 return KernelMenu

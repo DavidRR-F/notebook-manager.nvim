@@ -29,7 +29,8 @@ Use notebook navigator with the following plugins to complete your vim notebook 
 https://github.com/DavidRR-F/notebook-manager.nvim/assets/99210748/33222faf-1b54-4843-941f-e6ce2fa26ba1
 
 ### Kernel Menu
-- `j/k`: Navigate Menu
+- `j/k`: Navigate menu
+- `q`: Escape menu
 - `a`: Create a new kernel 
 - `d`: Delete selected kernel
 
@@ -49,14 +50,14 @@ return {
     "DeleteBook",
     "CreateKernel",
     "DeleteKernel",
-    "KernelMenu",
+    "KernelMenuToggle",
   },
   opts = {
     notebook_dir = "./notebooks",
     ignore_package_manager = false,
   },
   keys = {
-    { "<leader>km", "<cmd>:KernelMenu<cr>", desc = "Show Kernels" },
+    { "<leader>km", "<cmd>:KernelMenuToggle<cr>", desc = "Toggle Kernel List Menu" },
   }
 }
 ```
@@ -70,7 +71,7 @@ use {
     "DeleteBook",
     "CreateKernel",
     "DeleteKernel",
-    "KernelMenu",
+    "KernelMenuToggle",
   },
   config = function()
     require('notebook-manager').setup{
@@ -79,7 +80,7 @@ use {
     }
   end,
   keys = {
-    { "<leader>km", "<cmd>:KernelMenu<cr>", desc = "Show Kernels" },
+    { "<leader>km", "<cmd>:KernelMenuToggle<cr>", desc = "Toggle Kernel List Menu" },
   }
 }
 ```
@@ -97,7 +98,7 @@ autocmd! VimEnter * command! -nargs=* CreateBook lua require('notebook-manager.c
 autocmd! VimEnter * command! -nargs=* DeleteBook lua require('notebook-manager.commands').delete_notebook(<f-args>)
 autocmd! VimEnter * command! -nargs=* CreateKernel lua require('notebook-manager.commands').create_kernel(<f-args>)
 autocmd! VimEnter * command! -nargs=* DeleteKernel lua require('notebook-manager.commands').delete_kernel(<f-args>)
-autocmd! VimEnter * command! KernelMenu lua require('notebook-manager.commands').kernel_menu_show()
+autocmd! VimEnter * command! KernelMenuToggle lua require('notebook-manager.commands').kernel_menu_toggle()
 
 " Configuration
 lua << EOF
@@ -108,7 +109,7 @@ require('notebook-manager').setup{
 EOF
 
 " Keybindings
-nmap <leader>km :KernelMenu<CR>
+nmap <leader>km :KernelMenuToggle<CR>
 
 ```
 

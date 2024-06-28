@@ -63,8 +63,8 @@ M.delete_kernel = function(kernel_name)
   end
 end
 
-M.kernel_menu_show = function()
-  menu:show()
+M.kernel_menu_toggle = function()
+  menu:toggle()
 end
 
 M.kernel_menu_delete = function()
@@ -75,9 +75,6 @@ M.kernel_menu_create = function()
   menu:create()
 end
 
-M.kernel_menu_close = function()
-  menu:close()
-end
 
 -- Register Neovim commands
 M.register_commands = function()
@@ -93,8 +90,8 @@ M.register_commands = function()
   vim.api.nvim_create_user_command('DeleteKernel', function(opts)
     M.delete_kernel(opts.args)
   end, { nargs = '?' })
-  vim.api.nvim_create_user_command('KernelMenu', function()
-    M.kernel_menu_show()
+  vim.api.nvim_create_user_command('KernelMenuToggle', function()
+    M.kernel_menu_toggle()
   end, { nargs = '?' })
 end
 
